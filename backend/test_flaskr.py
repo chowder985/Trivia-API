@@ -19,8 +19,8 @@ class TriviaTestCase(unittest.TestCase):
             'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
-        self.new_book = {"question": "Who's the author of the book 'Steve Jobs' published in 2013 and 2015?",
-                         "answer": "Walter Isaacson", "difficulty": 3, "category": 4}
+        self.new_question = {"question": "Who's the author of the book 'Steve Jobs' published in 2013 and 2015?",
+                             "answer": "Walter Isaacson", "difficulty": 3, "category": 4}
         self.previous_questions = [17, 24]
 
         # binds the app to the current context
@@ -80,7 +80,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'unprocessable')
 
     def test_new_question_success(self):
-        res = self.client().post('/questions', json=self.new_book)
+        res = self.client().post('/questions', json=self.new_question)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -88,7 +88,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['created'])
 
     def test_new_question_unprocessable(self):
-        res = self.client().post('/questions/98', json=self.new_book)
+        res = self.client().post('/questions/98', json=self.new_question)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 405)

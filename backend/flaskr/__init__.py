@@ -225,6 +225,8 @@ def create_app(test_config=None):
                 formatted_questions = [question.format()
                                        for question in questions]
                 question = random.choice(formatted_questions)
+            else:
+                abort(404)
             return jsonify({
                 'success': True,
                 'question': question
