@@ -39,6 +39,28 @@ class TriviaTestCase(unittest.TestCase):
     Write at least one test for each test for successful operation and for expected errors.
     """
 
+    def test_show_categories_success(self):
+        res = self.client().get('/categories')
+        data = json.loads(res.data)
+
+        categories = {}
+        for category in Category.query.all():
+            categories[category.id] = category.type
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['categories'])
+        self.assertEqual(data['total_categories'], len(categories))
+
+    def test_show_categories_method_not_allowed(self):
+        res = self.client().get('/categories/2')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['error'], 404)
+        self.assertEqual(data['message'], 'Resource could not be found')
+
     def test_show_questions_success(self):
         res = self.client().get('/questions')
         data = json.loads(res.data)
@@ -60,14 +82,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Resource could not be found')
 
     def test_delete_question_success(self):
-        res = self.client().delete('/questions/2')
+        res = self.client().delete('/questions/47')
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 2).one_or_none()
+        question = Question.query.filter(Question.id == 47).one_or_none()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(data['deleted'], 2)
+        self.assertEqual(data['deleted'], 47)
         self.assertEqual(question, None)
 
     def test_delete_question_unprocessable(self):
@@ -145,15 +167,15 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['question'])
 
-    def test_quiz_question_not_found(self):
+    def test_quiz_question_unprocessable(self):
         res = self.client().post('/quizzes',
-                                 json={"previous_questions": self.previous_questions, "quiz_category": {"id": 200, "type": "Technology"}})
+                                 json={"previous_questions": self.previous_questions})
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['error'], 404)
-        self.assertEqual(data['message'], 'Resource could not be found')
+        self.assertEqual(data['error'], 422)
+        self.assertEqual(data['message'], 'unprocessable')
 
 
 # Make the tests conveniently executable
